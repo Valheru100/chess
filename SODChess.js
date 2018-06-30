@@ -6,9 +6,9 @@ const Chess = require("chess.js").Chess;
 const Engine = require("node-uci").Engine;
 const config = require("./config");
 
-var engine = new Engine(config.stockfishLocation);
+var engine = new Engine(config.stockfishLocationv8);
 engine.init();
-engine.setoption("MultiPV", 3);
+engine.setoption("MultiPV", "1");
 
 var authorized = config.authIds;
 var SODChess = new Discord.Client({ autoReconnect: true });
@@ -23,6 +23,7 @@ SODChess.on("ready", () => {
 //When message comes in strip prefix and get command, then call relevent function depending on command
 
 SODChess.on("message", message => {
+try{
     if (message.content.startsWith(config.prefix)) {
         var commands = message.content.substring(1, message.content.length).split(/\n| /); //split on a new line and spaces
         var id = message.author.id + "!?#" + message.channel.id;
@@ -54,6 +55,10 @@ SODChess.on("message", message => {
                 break;
         }
     }
+} catch(exception) 
+{
+	message.reply("something went wrong!");
+}
 });
 
 //Help function returns descriptions and usages of each command
@@ -68,27 +73,27 @@ function help(message) {
             },
             fields: [{
                 name: config.prefix + "help",
-                value: "Shows this message\nUsage: $help"
+                value: "Shows this message\nUsage: " + config.prefix + "help"
             },
             {
                 name: config.prefix + "info",
-                value: "Shows details about the bot\nUsage: $info"
+                value: "Shows details about the bot\nUsage: " + config.prefix  + "info"
             },
             {
                 name: config.prefix + "startgame",
-                value: "Starts a new game, only one game can run per person\nUsage: $startgame"
+                value: "Starts a new game, only one game can run per person\nUsage: " + config.prefix + "startgame"
             },
             {
                 name: config.prefix + "resign",
-                value: "Resign from the game\nUsage: $resign"
+                value: "Resign from the game\nUsage: " + config.prefix + "resign"
             },
             {
                 name: config.prefix + "move",
-                value: "Make a move!\nMove Syntax: for all pawns just use the square to move to, far all others use the designation of the piece\nUsage: $move Ne3 - moves Knight to e3"
+                value: "Make a move!\nMove Syntax: for all pawns just use the square to move to, far all others use the designation of the piece\nUsage: " + config.prefix + "move Ne3 - moves Knight to e3"
             },
             {
                 name: config.prefix + "enginelevel",
-                value: "Admin Command\nInitialises the engine AI from levels 1 to 8\nUsage: $enginelevel level\n"
+                value: "Admin Command\nInitialises the engine AI from levels 1 to 8\nUsage: " + config.prefix + "enginelevel level\n"
             }]
         }
     });
@@ -103,6 +108,8 @@ function info(message) {
 //Initialises the engine engine to whichever level you"d like
 
 function init(message, commands) {
+try 
+{
     if (authorized.indexOf(message.author.id) > -1) {
         if (commands[1] != null && (commands[1] >= 1 && commands[1] <= 8)) {
             try {
@@ -120,6 +127,10 @@ function init(message, commands) {
     else {
         message.reply("Only an authorised user can change the engine level")
     }
+} catch(exception)
+{
+	message.reply("something went wrong!");
+}
 };
 
 //Starts a game, each user can run 1 game at a time but no more
@@ -172,7 +183,8 @@ function endGame(message, id, resign, quiet) {
 //Function to control the user's move and the response move from stockfish
 
 function move(message, id, commands) {
-
+try
+{
     var move = commands[1]
 
     if (thinking[id] === true) {
@@ -203,6 +215,11 @@ function move(message, id, commands) {
     if (gamesInPlay[id].game_over()) {
         endGame(message, id, false, false);
     }
+}
+catch(exception)
+{
+	message.reply("something went wrong!");
+}
 }
 
 //Returns a link to an image generator using fen
